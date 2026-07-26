@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基础词汇学习卡</title>
+    <!-- Tailwind CSS Engine -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for premium Chinese Serif & English Inter layout -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f6f5f2;
+            color: #4a4540; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        .word-title { 
+            font-family: 'Noto Serif SC', serif; 
+        }
+        
+        /* 拼音标注样式 */
+        ruby {
+            ruby-position: over;
+            ruby-align: center;
+        }
+        rt {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.42em;
+            color: #8c8275;
+            letter-spacing: 0.1em;
+            padding-bottom: 0.35em;
+            user-select: none;
+        }
+
+        /* 3D 卡片翻转核心动画 */
+        #card-container { 
+            perspective: 1200px; 
+        }
+        .transform-style-3d { 
+            transform-style: preserve-3d; 
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .backface-hidden { 
+            backface-visibility: hidden; 
+            -webkit-backface-visibility: hidden;
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .rotate-y-180 { 
+            transform: rotateY(180deg); 
+        }
+        
+        #flip-card > div:nth-child(2) {
+            transform: rotateY(180deg);
+        }
+        
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.85;
+        }
+
+        /* 分类标签滚动 */
+        .category-scroll {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .category-scroll::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 flex flex-col items-center justify-start select-none">
+
+    <div id="app" class="w-full max-w-lg pt-4 flex flex-col">
+        <header class="text-center mb-4">
+            <h1 class="text-2xl font-bold text-stone-700 tracking-wide word-title">📚 基础词汇学习卡</h1>
+            <!-- 掌握度进度条 -->
+            <div class="mt-3 bg-stone-200/60 rounded-full h-2 w-full overflow-hidden flex">
+                <div id="mastery-progress-bar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <p id="mastery-status" class="text-[10px] text-stone-400 mt-1.5 font-mono tracking-wider">已掌握 0 / 53 词 (0%)</p>
+        </header>
+
+        <!-- 分类筛选导航栏 - 适配8大分类 -->
+        <nav class="flex gap-1.5 flex-wrap justify-center mb-4 category-scroll" id="filterNav">
+            <button class="px-3 py-1 bg-stone-800 text-white border border-stone-800 text-xs rounded-full transition-all active" onclick="filterCategory('全部')">全部</button>
+            <button class="px-3 py-1 bg-white border border-stone-200 hover:border-stone-400 hover:bg-stone-50 text-stone-600 text-xs rounded-full transition-all" onclick="filterCategory('空间方位')">📍 空间方位</button>
+            <button class="px-3 py-1 bg-white border border-stone-200 hover:border-stone-400 hover:bg-stone-50 text-stone-600 text-xs rounded-full transition-all" onclick="filterCategory('日常生活')">🏠 日常生活</button>
+            <button class="px-3 py-1 bg-white border border-stone-200 hover:border-stone-400 hover:bg-stone-50 text-stone-600 text-xs rounded-full transition-all" onclick="filterCategory('日常事物')">🪑 日常事物</button>
+            <button class="px-3 py-1 bg-white border border-stone-200 hover:border-stone-400 hover:bg-stone-50 text-stone-600 text-xs rounded-full transition-all" onclick="filterCategory('人物自然')">👤 人物自然</button>
+            <button class="px-3 py-1 bg-white border border-stone-200 hover:border-stone-400 hover:bg-stone-50 text-stone-600 text-xs rounded-full transition-all" onclick="filterCategory('基础颜色')">🎨 基础颜色</button>
+            <button class="px-3 py-1 bg-white border border-stone-200 hover:border-stone-400 hover:bg-stone-50 text-stone-600 text-xs rounded-full transition-all" onclick="filterCategory('动作行为')">🏃 动作行为</button>
+            <button class="px-3 py-1 bg-white border border-stone-200 hover:border-stone-400 hover:bg-stone-50 text-stone-600 text-xs rounded-full transition-all" onclick="filterCategory('状态形容')">📊 状态形容</button>
+        </nav>
+
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <!-- 错题专项训练 -->
+            <button onclick="startWeaknessTraining()" class="bg-white border border-stone-200 py-3 px-2 rounded-xl shadow-sm text-center text-stone-700 text-xs font-semibold hover:bg-stone-50 transition-all flex items-center justify-center gap-1.5">
+                🎯 错题训练 (0)
+            </button>
+            
+            <!-- Quiz 小测验 -->
+            <button onclick="startQuiz()" class="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 px-2 rounded-xl shadow-md text-xs font-semibold hover:from-amber-600 hover:to-orange-600 transition-all flex items-center justify-center gap-1.5">
+                📝 开始小测验
+            </button>
+        </div>
+
+        <div id="card-container" class="w-full h-[380px] sm:h-[400px] cursor-pointer mb-4 relative">
+            <div id="flip-card" class="w-full h-full relative transform-style-3d">
+                
+                <!-- 卡片正面：词汇与大拼音 -->
+                <div class="absolute inset-0 bg-white rounded-2xl border border-stone-100 shadow-xl shadow-stone-200/50 flex flex-col items-center justify-center p-6 backface-hidden">
+                    <div id="card-word-ruby" class="word-title flex flex-wrap items-center justify-center text-5xl sm:text-6xl tracking-wide select-none">
+                        <!-- 由 JavaScript 动态生成带拼音的汉字 -->
+                    </div>
+                    <!-- 显示当前分类 -->
+                    <p id="card-category" class="text-[10px] text-stone-400 mt-4 font-mono tracking-wider bg-stone-50 px-3 py-1 rounded-full">分类</p>
+                </div>
+
+                <!-- 卡片反面：双栏翻译 + 大字号例句 -->
+                <div class="absolute inset-0 bg-orange-50/40 rounded-2xl border-2 border-orange-100/60 shadow-xl shadow-stone-200/50 flex flex-col p-5 backface-hidden overflow-hidden">
+                    <div class="absolute inset-2 border border-amber-900/5 rounded-xl pointer-events-none"></div>
+
+                    <div class="relative z-10 flex flex-col justify-between h-full py-0.5">
+                        <!-- 中文释义区块 -->
+                        <div>
+                            <div class="inline-flex items-center gap-1 bg-amber-700/10 text-amber-800 text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md mb-1.5">
+                                <span>华文释义</span>
+                            </div>
+                            <p id="card-def-zh" class="text-[15px] font-semibold text-stone-800 leading-relaxed pl-1">暂无释义</p>
+                        </div>
+
+                        <!-- 翻译双栏区块 -->
+                        <div class="grid grid-cols-2 gap-3 border-t border-b border-amber-900/5 py-2.5 my-1">
+                            <div>
+                                <div class="inline-flex items-center gap-1 bg-sky-100/60 text-sky-800 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded mb-1">
+                                    <span>ENGLISH</span>
+                                </div>
+                                <p id="card-def-en" class="text-[11px] italic text-sky-900/70 leading-snug pl-0.5">No translation.</p>
+                            </div>
+                            <div>
+                                <div class="inline-flex items-center gap-1 bg-rose-100/60 text-rose-800 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded mb-1">
+                                    <span>MELAYU</span>
+                                </div>
+                                <p id="card-def-bm" class="text-[11px] text-rose-900/70 leading-snug pl-0.5 font-medium">Tiada terjemahan.</p>
+                            </div>
+                        </div>
+
+                        <!-- 例句区块 -->
+                        <div class="bg-white/80 border border-amber-950/5 p-3.5 rounded-xl shadow-sm">
+                            <div class="inline-flex items-center gap-1 bg-amber-900/5 text-amber-900/70 text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded mb-1.5">
+                                <span>例句</span>
+                            </div>
+                            <p id="card-example" class="text-stone-700 text-[13px] font-medium leading-relaxed pl-0.5 tracking-wide">暂无例句。</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="w-full flex flex-col items-center gap-3">
+            <div class="grid grid-cols-2 gap-4 w-full">
+                <button onclick="markMastery(false)" class="bg-white border-2 border-stone-200 hover:border-red-400 hover:bg-red-50/30 text-stone-700 py-3 px-6 rounded-xl font-semibold shadow-sm transition-all text-center text-sm flex items-center justify-center gap-2">
+                    ❌ 待加强
+                </button>
+                <button onclick="markMastery(true)" class="bg-stone-800 hover:bg-stone-900 text-white py-3 px-6 rounded-xl font-semibold shadow-md transition-all text-center text-sm flex items-center justify-center gap-2">
+                    ✅ 已掌握
+                </button>
+            </div>
+
+            <p id="progress-indicator" class="text-[11px] text-stone-400 font-mono tracking-wider">进度：0 / 0</p>
+        </div>
+    </div>
+
+    <!-- Toast 消息通知 -->
+    <div id="toast-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- 智能测验视窗 -->
+    <div id="quiz-modal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 relative flex flex-col max-h-[90vh]">
+            <button onclick="closeQuiz()" class="absolute top-3 right-3 text-stone-400 hover:text-stone-600 text-xl font-bold transition-colors">&times;</button>
+            
+            <div class="border-b border-stone-100 pb-2 mb-3">
+                <h3 class="text-base font-bold text-stone-800 flex items-center gap-1" id="quiz-title-text">🎯 词汇释义挑战</h3>
+                <div class="w-full bg-stone-100 h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div id="quiz-progress-bar" class="bg-amber-500 h-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <p id="quiz-q-num" class="text-[10px] text-stone-400 mt-1 font-mono">题目 1 / 10</p>
+            </div>
+
+            <div class="flex-1 overflow-y-auto mb-1 pr-1">
+                <div id="quiz-question-container">
+                    <h4 id="quiz-question-word" class="text-2xl font-serif font-bold text-stone-800 text-center my-3 tracking-wide">-</h4>
+                    <div id="quiz-options" class="space-y-2"></div>
+                </div>
+                
+                <div id="quiz-result-container" class="hidden text-center py-6">
+                    <span class="text-4xl block animate-bounce">🏆</span>
+                    <h4 class="text-xl font-bold text-stone-800 mt-3">测验圆满结束！</h4>
+                    <p id="quiz-score" class="text-3xl font-black text-amber-600 my-3">0 / 10</p>
+                    <p id="quiz-eval" class="text-xs text-stone-500 mb-5 px-4">完成得不错！</p>
+                    <button onclick="startQuiz()" class="w-full py-2.5 bg-stone-800 text-white rounded-xl text-sm font-medium hover:bg-stone-900 transition-colors">
+                        再考一次
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         📦 从 data.js 加载词汇数据
+         ========================================== -->
+    <script src="data.js"></script>
+
+    <!-- ==========================================
+         🎮 核心交互逻辑
+         ========================================== -->
+    <script>
+        // 从 data.js 获取数据（假设 data.js 导出为 vocabularyData 或 idiomData）
+        // 根据您的 data.js 实际导出的变量名调整
+        let allIdioms = [];
+
+        // 检测数据来源
+        if (typeof vocabularyData !== 'undefined') {
+            allIdioms = vocabularyData;
+        } else if (typeof idiomData !== 'undefined') {
+            allIdioms = idiomData;
+        } else {
+            // 如果 data.js 使用 export 方式，需要从 window 对象获取
+            // 或者 data.js 直接定义了全局变量
+            console.warn('未找到词汇数据，请检查 data.js 是否正确加载');
+            allIdioms = [];
+        }
+
+        // 如果数据为空，显示提示
+        if (allIdioms.length === 0) {
+            console.error('❌ 词汇数据加载失败！请确保 data.js 文件存在且变量名正确。');
+            document.querySelector('h1').textContent = '⚠️ 数据加载失败';
+        }
+
+        // ==========================================
+        // 核心交互逻辑
+        // ==========================================
+        let currentPlan = [];
+        let currentIndex = 0;
+        let isFlipped = false;
+        let isWeaknessMode = false;
+        let activeCategory = '全部';
+
+        // 测验系统
+        let quizQuestions = [];
+        let quizCurrentIndex = 0;
+        let quizScore = 0;
+        const QUIZ_TOTAL = 10;
+
+        function generateRubyMarkup(word, pinyinStr) {
+            const chars = word.split('');
+            const pinyins = pinyinStr.split(' ');
+            let html = '';
+            for (let i = 0; i < chars.length; i++) {
+                const py = pinyins[i] || '';
+                html += `<ruby class="mx-1">${chars[i]}<rt>${py}</rt></ruby>`;
+            }
+            return html;
+        }
+
+        function initApp() {
+            try {
+                // 如果数据为空，显示空状态
+                if (allIdioms.length === 0) {
+                    document.getElementById('card-word-ruby').innerHTML = 
+                        '<span class="text-base text-stone-400">⚠️ 请检查 data.js 文件<br>确保词汇数据正确加载</span>';
+                    return;
+                }
+
+                let wrongList = JSON.parse(localStorage.getItem('vocabulary_wrong_list')) || [];
+                updateWeaknessButton(wrongList.length);
+
+                filterCategoryData();
+                setupFlipEvent();
+                renderCard();
+                updateMasteryProgress();
+            } catch (error) {
+                console.error("初始化加载错误:", error);
+            }
+        }
+
+        function filterCategoryData() {
+            if (allIdioms.length === 0) {
+                currentPlan = [];
+                return;
+            }
+            if (activeCategory === '全部') {
+                currentPlan = [...allIdioms];
+            } else {
+                currentPlan = allIdioms.filter(item => item.category === activeCategory);
+            }
+            currentIndex = 0;
+        }
+
+        function renderCard() {
+            if (currentPlan.length === 0) {
+                showEmptyState();
+                return;
+            }
+            if (currentIndex >= currentPlan.length) { currentIndex = 0; }
+
+            const currentWord = currentPlan[currentIndex];
+            const flipCardEl = document.getElementById('flip-card');
+            if (flipCardEl) flipCardEl.classList.remove('rotate-y-180');
+            isFlipped = false;
+
+            // 1. 渲染正面注音
+            const rubyContainer = document.getElementById('card-word-ruby');
+            if (rubyContainer) {
+                rubyContainer.innerHTML = generateRubyMarkup(currentWord.idiom, currentWord.pinyin);
+            }
+
+            // 显示分类标签
+            document.getElementById('card-category').innerText = `🏷️ ${currentWord.category}`;
+
+            // 2. 渲染反面三语翻译
+            document.getElementById('card-def-zh').innerText = currentWord.defZh || '暂无释义';
+            document.getElementById('card-def-en').innerText = currentWord.defEn || 'No translation available.';
+            document.getElementById('card-def-bm').innerText = currentWord.defBm || 'Tiada terjemahan.';
+            
+            const exampleEl = document.getElementById('card-example');
+            if (exampleEl) {
+                const wordText = currentWord.idiom || '';
+                let exampleText = currentWord.example || '暂无例句。';
+                if (wordText && exampleText.includes(wordText)) {
+                    exampleText = exampleText.replace(wordText, ` ______ `);
+                }
+                exampleEl.innerText = exampleText;
+            }
+
+            // 3. 更新页脚指示文本
+            const progressEl = document.getElementById('progress-indicator');
+            if (progressEl) {
+                progressEl.innerText = `进度：${currentIndex + 1} / ${currentPlan.length} ${isWeaknessMode ? '（错题训练中）' : ''}`;
+            }
+        }
+
+        function setupFlipEvent() {
+            const container = document.getElementById('card-container');
+            const flipCardEl = document.getElementById('flip-card');
+            if (container && flipCardEl) {
+                container.onclick = null;
+                container.onclick = function() {
+                    isFlipped = !isFlipped;
+                    flipCardEl.classList.toggle('rotate-y-180', isFlipped);
+                };
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-stone-800 text-white' : 'bg-red-50 border border-red-200 text-red-800';
+            toast.className = `${bgClass} px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold tracking-wide flex items-center gap-1.5 animate-bounce pointer-events-auto transition-all duration-300`;
+            toast.innerHTML = message;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => { toast.remove(); }, 300);
+            }, 2500);
+        }
+
+        function updateMasteryProgress() {
+            if (allIdioms.length === 0) {
+                document.getElementById('mastery-progress-bar').style.width = '0%';
+                document.getElementById('mastery-status').innerText = '暂无数据';
+                return;
+            }
+
+            let wrongList = JSON.parse(localStorage.getItem('vocabulary_wrong_list')) || [];
+            const totalWords = allIdioms.length;
+            const wrongCount = wrongList.length;
+            const masteredCount = Math.max(0, totalWords - wrongCount);
+            
+            const percent = totalWords > 0 ? Math.round((masteredCount / totalWords) * 100) : 0;
+            
+            const bar = document.getElementById('mastery-progress-bar');
+            if (bar) bar.style.width = `${percent}%`;
+            
+            const txt = document.getElementById('mastery-status');
+            if (txt) txt.innerText = `已掌握 ${masteredCount} / ${totalWords} 词 (${percent}%)`;
+        }
+
+        function markMastery(isMastered) {
+            if (currentPlan.length === 0) return;
+            const currentWord = currentPlan[currentIndex];
+            let wrongList = JSON.parse(localStorage.getItem('vocabulary_wrong_list')) || [];
+            const currentWordText = currentWord.idiom || '';
+
+            if (!isMastered) {
+                if (!wrongList.some(item => item.idiom === currentWordText)) { wrongList.push(currentWord); }
+                showToast("📌 已加入待加强训练库");
+            } else {
+                wrongList = wrongList.filter(item => item.idiom !== currentWordText);
+                showToast("🎉 太棒了，这个词已经熟练掌握！");
+            }
+
+            localStorage.setItem('vocabulary_wrong_list', JSON.stringify(wrongList));
+            updateWeaknessButton(wrongList.length);
+            updateMasteryProgress();
+            currentIndex++;
+            
+            if (currentIndex >= currentPlan.length) {
+                if (isWeaknessMode) {
+                    showToast("👑 太棒了！本轮错题专项集训全部通关！");
+                    isWeaknessMode = false;
+                    filterCategory('全部');
+                    renderCard();
+                    return;
+                } else {
+                    showToast("🌟 该分类的词汇已全部通读完毕！");
+                    currentIndex = 0; 
+                }
+            }
+            renderCard();
+        }
+
+        function startWeaknessTraining() {
+            const wrongList = JSON.parse(localStorage.getItem('vocabulary_wrong_list')) || [];
+            if (wrongList.length === 0) {
+                showToast("✨ 极好！当前没有任何待加强的错词！");
+                return;
+            }
+            isWeaknessMode = true;
+            currentPlan = [...wrongList].sort(() => 0.5 - Math.random());
+            currentIndex = 0;
+            renderCard();
+        }
+
+        function filterCategory(categoryName) {
+            isWeaknessMode = false;
+            activeCategory = categoryName;
+
+            const buttons = document.querySelectorAll('#filterNav button');
+            buttons.forEach(btn => {
+                if (btn.innerText.includes(categoryName) || (categoryName === '全部' && btn.innerText === '全部')) {
+                    btn.classList.add('bg-stone-800', 'text-white', 'border-stone-800');
+                    btn.classList.remove('bg-white', 'text-stone-600', 'border-stone-200');
+                } else {
+                    btn.classList.remove('bg-stone-800', 'text-white', 'border-stone-800');
+                    btn.classList.add('bg-white', 'text-stone-600', 'border-stone-200');
+                }
+            });
+
+            filterCategoryData();
+            renderCard();
+        }
+
+        function updateWeaknessButton(count) {
+            const btn = document.querySelector('button[onclick="startWeaknessTraining()"]');
+            if (btn) btn.innerHTML = `🎯 错题训练 (<span class="text-amber-600 font-bold">${count}</span>)`;
+        }
+
+        function showEmptyState() {
+            const rubyContainer = document.getElementById('card-word-ruby');
+            if (rubyContainer) rubyContainer.innerHTML = `<span class="text-base text-stone-400">该类目下暂无词汇数据</span>`;
+            document.getElementById('card-category').innerText = '📭 空分类';
+        }
+
+        function startQuiz() {
+            const quizSource = currentPlan;
+
+            if (!quizSource || quizSource.length === 0) {
+                showToast("⚠️ 当前选中的类目下暂无词汇，无法开始测验！", "error");
+                return;
+            }
+            if (allIdioms.length < 4) {
+                showToast("⚠️ 词汇总数少于4个，无法生成选择干扰项！", "error");
+                return;
+            }
+
+            document.getElementById('quiz-question-container').classList.remove('hidden');
+            document.getElementById('quiz-result-container').classList.add('hidden');
+
+            const titleText = isWeaknessMode ? "错题本挑战" : `${activeCategory} 专项挑战`;
+            document.getElementById('quiz-title-text').innerText = `🎯 ${titleText}`;
+
+            const shuffled = [...quizSource].sort(() => 0.5 - Math.random());
+            
+            const actualTotal = Math.min(QUIZ_TOTAL, quizSource.length);
+            quizQuestions = shuffled.slice(0, actualTotal);
+            
+            quizQuestions = quizQuestions.map(q => {
+                return {
+                    ...q,
+                    qType: Math.floor(Math.random() * 3)
+                };
+            });
+
+            quizCurrentIndex = 0;
+            quizScore = 0;
+
+            document.getElementById('quiz-modal').classList.remove('hidden');
+            renderQuizQuestion();
+        }
+
+        function closeQuiz() {
+            document.getElementById('quiz-modal').classList.add('hidden');
+        }
+
+        function renderQuizQuestion() {
+            const currentQ = quizQuestions[quizCurrentIndex];
+            
+            document.getElementById('quiz-q-num').innerText = `题目 ${quizCurrentIndex + 1} / ${quizQuestions.length}`;
+            const percent = ((quizCurrentIndex) / quizQuestions.length) * 100;
+            document.getElementById('quiz-progress-bar').style.width = `${percent}%`;
+
+            const questionWordEl = document.getElementById('quiz-question-word');
+
+            const distractors = allIdioms
+                .filter(item => item.idiom !== currentQ.idiom)
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 3);
+
+            const options = [currentQ, ...distractors].sort(() => 0.5 - Math.random());
+            const optionsContainer = document.getElementById('quiz-options');
+
+            if (currentQ.qType === 0) {
+                // 看词猜意
+                questionWordEl.innerHTML = `<span class="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-sans font-medium">看词猜意</span><br>${currentQ.idiom}`;
+                
+                optionsContainer.innerHTML = options.map(opt => {
+                    const isCorrect = (opt.idiom === currentQ.idiom);
+                    return `
+                        <button onclick="handleQuizAnswer(this, ${isCorrect})" class="w-full text-left p-3.5 rounded-xl border-2 border-stone-100 hover:border-amber-400 hover:bg-amber-50/50 transition-all font-sans text-stone-700 text-sm leading-relaxed">
+                            ${opt.defZh}
+                        </button>
+                    `;
+                }).join('');
+
+            } else if (currentQ.qType === 1) {
+                // 根据释义选词
+                questionWordEl.innerHTML = `<span class="text-[10px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-sans font-medium block w-max mx-auto mb-2">根据释义选词汇</span><p class="text-base font-medium font-sans px-4 text-stone-700 leading-relaxed text-left">${currentQ.defZh}</p>`;
+                
+                optionsContainer.innerHTML = options.map(opt => {
+                    const isCorrect = (opt.idiom === currentQ.idiom);
+                    return `
+                        <button onclick="handleQuizAnswer(this, ${isCorrect})" class="w-full text-center p-3.5 rounded-xl border-2 border-stone-100 hover:border-amber-400 hover:bg-amber-50/50 transition-all font-serif font-bold text-stone-800 text-base">
+                            ${opt.idiom}
+                        </button>
+                    `;
+                }).join('');
+
+            } else if (currentQ.qType === 2) {
+                // 语境填空
+                let exampleText = currentQ.example || '暂无例句。';
+                if (currentQ.idiom && exampleText.includes(currentQ.idiom)) {
+                    exampleText = exampleText.replace(currentQ.idiom, ` ______ `);
+                }
+                
+                questionWordEl.innerHTML = `<span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-sans font-medium block w-max mx-auto mb-2">词汇语境填空</span><p class="text-base font-normal font-sans px-4 text-stone-700 leading-relaxed text-left">${exampleText}</p>`;
+                
+                optionsContainer.innerHTML = options.map(opt => {
+                    const isCorrect = (opt.idiom === currentQ.idiom);
+                    return `
+                        <button onclick="handleQuizAnswer(this, ${isCorrect})" class="w-full text-center p-3.5 rounded-xl border-2 border-stone-100 hover:border-amber-400 hover:bg-amber-50/50 transition-all font-serif font-bold text-stone-800 text-base">
+                            ${opt.idiom}
+                        </button>
+                    `;
+                }).join('');
+            }
+        }
+
+        function handleQuizAnswer(buttonEl, isCorrect) {
+            const allButtons = document.getElementById('quiz-options').querySelectorAll('button');
+            allButtons.forEach(btn => btn.disabled = true);
+
+            if (isCorrect) {
+                quizScore++;
+                buttonEl.classList.remove('border-stone-100', 'hover:border-amber-400');
+                buttonEl.classList.add('border-green-500', 'bg-green-50/60', 'text-green-800');
+            } else {
+                buttonEl.classList.remove('border-stone-100', 'hover:border-amber-400');
+                buttonEl.classList.add('border-red-500', 'bg-red-50/60', 'text-red-800');
+                
+                allButtons.forEach(btn => {
+                    if (btn.getAttribute('onclick').includes('true')) {
+                        btn.classList.add('border-green-500', 'bg-green-50/40');
+                    }
+                });
+
+                // 答错的词汇自动写入本地错题库
+                let wrongList = JSON.parse(localStorage.getItem('vocabulary_wrong_list')) || [];
+                const currentQ = quizQuestions[quizCurrentIndex];
+                if (!wrongList.some(item => item.idiom === currentQ.idiom)) {
+                    wrongList.push(currentQ);
+                    localStorage.setItem('vocabulary_wrong_list', JSON.stringify(wrongList));
+                    updateWeaknessButton(wrongList.length);
+                    updateMasteryProgress();
+                }
+            }
+
+            setTimeout(() => {
+                quizCurrentIndex++;
+                if (quizCurrentIndex < quizQuestions.length) {
+                    renderQuizQuestion();
+                } else {
+                    showQuizResults();
+                }
+            }, 1200);
+        }
+
+        function showQuizResults() {
+            document.getElementById('quiz-progress-bar').style.width = `100%`;
+            document.getElementById('quiz-question-container').classList.add('hidden');
+            document.getElementById('quiz-result-container').classList.remove('hidden');
+
+            document.getElementById('quiz-score').innerText = `${quizScore} / ${quizQuestions.length}`;
+            
+            let evaluation = "再接再厉，多刷刷闪卡吧！";
+            if (quizScore === quizQuestions.length) {
+                evaluation = "👑 太厉害了！满分通关！";
+            } else if (quizScore >= Math.floor(quizQuestions.length * 0.8)) {
+                evaluation = "🌟 优秀！底子非常扎实！";
+            } else if (quizScore >= Math.floor(quizQuestions.length * 0.6)) {
+                evaluation = "👍 及格啦，答错的词已经自动帮你放入错题库啰！";
+            }
+            document.getElementById('quiz-eval').innerText = evaluation;
+        }
+
+        // 窗口预载
+        window.onload = function() {
+            initApp();
+            filterCategory('全部');
+        };
+    </script>
+</body>
+</html>
