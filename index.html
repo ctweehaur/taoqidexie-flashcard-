@@ -3,18 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>基础词汇学习卡</title>
-    
-    <!-- 1. 外部 CSS（您的 style.css） -->
+    <title>《淘气的鞋》生词学习卡</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- 外部样式 -->
     <link rel="stylesheet" href="style.css">
     
-    <!-- 2. Tailwind CSS (CDN) - 用于快速布局 -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- 3. Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- 4. 额外的样式（与您的 style.css 不冲突） -->
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
@@ -22,21 +18,9 @@
             color: #4a4540; 
             -webkit-tap-highlight-color: transparent;
         }
-        
         .word-title { 
             font-family: 'Noto Serif SC', serif; 
         }
-        
-        /* 分类滚动条隐藏 */
-        .category-scroll {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-        .category-scroll::-webkit-scrollbar {
-            display: none;
-        }
-        
-        /* Toast 动画 */
         .animate-bounce {
             animation: toastBounce 0.5s ease;
         }
@@ -44,43 +28,21 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-8px); }
         }
-        
-        /* 测验弹窗 */
-        #quiz-modal {
-            backdrop-filter: blur(4px);
-        }
     </style>
 </head>
 <body class="min-h-screen p-4 flex flex-col items-center justify-start select-none">
 
     <div id="app" class="w-full max-w-lg pt-4 flex flex-col">
-        <!-- ========== 顶部标题 ========== -->
+        <!-- 标题 -->
         <header class="text-center mb-4">
-            <h1 class="text-2xl font-bold text-stone-700 tracking-wide word-title">📚 基础词汇学习卡</h1>
-            
-            <!-- 每日状态 -->
-            <p id="daily-status" class="text-xs text-stone-500 mt-1 font-medium">每日复习计划（今日 10 词）</p>
-            
-            <!-- 掌握度进度条 -->
+            <h1 class="text-2xl font-bold text-stone-700 tracking-wide word-title">《淘气的鞋》</h1>
             <div class="mt-3 bg-stone-200/60 rounded-full h-2 w-full overflow-hidden flex">
                 <div id="mastery-progress-bar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
             </div>
-            <p id="mastery-status" class="text-[10px] text-stone-400 mt-1.5 font-mono tracking-wider">已掌握 0 / 53 词 (0%)</p>
+            <p id="mastery-status" class="text-[10px] text-stone-400 mt-1.5 font-mono tracking-wider">已掌握 0 / 0 词 (0%)</p>
         </header>
 
-        <!-- ========== 分类筛选导航 ========== -->
-        <nav class="flex gap-1.5 flex-wrap justify-center mb-4 category-scroll" id="filterNav">
-            <button class="px-3 py-1 bg-stone-800 text-white border border-stone-800 text-xs rounded-full transition-all" onclick="filterCategory('全部')">全部</button>
-            <button class="px-3 py-1 bg-white border border-stone-200 hover:border-stone-400 hover:bg-stone-50 text-stone-600 text-xs rounded-full transition-all" onclick="filterCategory('空间方位')">📍 空间方位</button>
-            <button class="px-3 py-1 bg-white border border-stone-200 hover:border-stone-400 hover:bg-stone-50 text-stone-600 text-xs rounded-full transition-all" onclick="filterCategory('日常生活')">🏠 日常生活</button>
-            <button class="px-3 py-1 bg-white border border-stone-200 hover:border-stone-400 hover:bg-stone-50 text-stone-600 text-xs rounded-full transition-all" onclick="filterCategory('日常事物')">🪑 日常事物</button>
-            <button class="px-3 py-1 bg-white border border-stone-200 hover:border-stone-400 hover:bg-stone-50 text-stone-600 text-xs rounded-full transition-all" onclick="filterCategory('人物自然')">👤 人物自然</button>
-            <button class="px-3 py-1 bg-white border border-stone-200 hover:border-stone-400 hover:bg-stone-50 text-stone-600 text-xs rounded-full transition-all" onclick="filterCategory('基础颜色')">🎨 基础颜色</button>
-            <button class="px-3 py-1 bg-white border border-stone-200 hover:border-stone-400 hover:bg-stone-50 text-stone-600 text-xs rounded-full transition-all" onclick="filterCategory('动作行为')">🏃 动作行为</button>
-            <button class="px-3 py-1 bg-white border border-stone-200 hover:border-stone-400 hover:bg-stone-50 text-stone-600 text-xs rounded-full transition-all" onclick="filterCategory('状态形容')">📊 状态形容</button>
-        </nav>
-
-        <!-- ========== 功能按钮 ========== -->
+        <!-- 功能按钮 -->
         <div class="grid grid-cols-2 gap-3 mb-4">
             <button onclick="startWeaknessTraining()" class="bg-white border border-stone-200 py-3 px-2 rounded-xl shadow-sm text-center text-stone-700 text-xs font-semibold hover:bg-stone-50 transition-all flex items-center justify-center gap-1.5">
                 🎯 开启错题专项训练 (<span class="text-amber-600 font-bold" id="wrong-count">0</span>)
@@ -90,61 +52,80 @@
             </button>
         </div>
 
-        <!-- ========== 3D 闪卡 ========== -->
-        <div id="card-container" class="w-full h-[380px] sm:h-[400px] cursor-pointer mb-4 relative">
-            <div id="flip-card" class="w-full h-full relative transform-style-3d">
-                
-                <!-- 卡片正面 -->
-                <div class="absolute inset-0 bg-white rounded-2xl border border-stone-100 shadow-xl shadow-stone-200/50 flex flex-col items-center justify-center p-6 backface-hidden">
-                    <div id="card-idiom-ruby" class="word-title flex flex-wrap items-center justify-center text-5xl sm:text-6xl tracking-wide select-none">
-                        <!-- 由 JavaScript 动态生成 -->
-                    </div>
-                    <p id="card-category" class="text-[10px] text-stone-400 mt-4 font-mono tracking-wider bg-stone-50 px-3 py-1 rounded-full">分类</p>
-                </div>
-
-                <!-- 卡片反面 -->
-                <div class="absolute inset-0 bg-orange-50/40 rounded-2xl border-2 border-orange-100/60 shadow-xl shadow-stone-200/50 flex flex-col p-5 backface-hidden overflow-hidden">
-                    <div class="absolute inset-2 border border-amber-900/5 rounded-xl pointer-events-none"></div>
+        <!-- ==========================================
+             卡片容器 + 左右导航
+             ========================================== -->
+        <div class="relative flex items-center w-full mb-4">
+            <!-- 左导航按钮 -->
+            <button onclick="prevCard()" id="prev-btn" class="absolute left-0 z-10 bg-white/80 backdrop-blur-sm hover:bg-white border-2 border-stone-200 hover:border-amber-400 text-stone-700 w-10 h-10 rounded-full shadow-md transition-all flex items-center justify-center text-lg -ml-2">
+                ◀
+            </button>
+            
+            <!-- 卡片 -->
+            <div id="card-container" class="w-full h-[380px] sm:h-[400px] cursor-pointer relative mx-8">
+                <div id="flip-card" class="w-full h-full relative transform-style-3d">
                     
-                    <div class="relative z-10 flex flex-col justify-between h-full py-0.5">
-                        <!-- 中文释义 -->
-                        <div>
-                            <div class="inline-flex items-center gap-1 bg-amber-700/10 text-amber-800 text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md mb-1.5">
-                                <span>华文释义</span>
-                            </div>
-                            <p id="card-def-zh" class="text-[15px] font-semibold text-stone-800 leading-relaxed pl-1">暂无释义</p>
-                        </div>
-
-                        <!-- 英马双语翻译 -->
-                        <div class="grid grid-cols-2 gap-3 border-t border-b border-amber-900/5 py-2.5 my-1">
-                            <div>
-                                <div class="inline-flex items-center gap-1 bg-sky-100/60 text-sky-800 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded mb-1">
-                                    <span>ENGLISH</span>
-                                </div>
-                                <p id="card-def-en" class="text-[11px] italic text-sky-900/70 leading-snug pl-0.5">No translation.</p>
-                            </div>
-                            <div>
-                                <div class="inline-flex items-center gap-1 bg-rose-100/60 text-rose-800 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded mb-1">
-                                    <span>MELAYU</span>
-                                </div>
-                                <p id="card-def-bm" class="text-[11px] text-rose-900/70 leading-snug pl-0.5 font-medium">Tiada terjemahan.</p>
-                            </div>
-                        </div>
-
-                        <!-- 例句 -->
-                        <div class="bg-white/80 border border-amber-950/5 p-3.5 rounded-xl shadow-sm">
-                            <div class="inline-flex items-center gap-1 bg-amber-900/5 text-amber-900/70 text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded mb-1.5">
-                                <span>例句</span>
-                            </div>
-                            <p id="card-example" class="text-stone-700 text-[13px] font-medium leading-relaxed pl-0.5 tracking-wide">暂无例句。</p>
+                    <!-- 卡片正面 -->
+                    <div class="absolute inset-0 bg-white rounded-2xl border border-stone-100 shadow-xl shadow-stone-200/50 flex flex-col items-center justify-center p-6 backface-hidden">
+                        <div id="card-word-ruby" class="word-title flex flex-wrap items-center justify-center text-5xl sm:text-6xl tracking-wide select-none">
+                            <!-- 由 JavaScript 动态生成带拼音的汉字 -->
                         </div>
                     </div>
-                </div>
 
+                    <!-- 卡片反面 -->
+                    <div class="absolute inset-0 bg-orange-50/40 rounded-2xl border-2 border-orange-100/60 shadow-xl shadow-stone-200/50 flex flex-col p-5 backface-hidden overflow-hidden">
+                        <div class="absolute inset-2 border border-amber-900/5 rounded-xl pointer-events-none"></div>
+
+                        <div class="relative z-10 flex flex-col justify-between h-full py-0.5">
+                            <!-- 中文释义 -->
+                            <div>
+                                <div class="inline-flex items-center gap-1 bg-amber-700/10 text-amber-800 text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md mb-1.5">
+                                    <span>华文释义</span>
+                                </div>
+                                <p id="card-def-zh" class="text-[15px] font-semibold text-stone-800 leading-relaxed pl-1">暂无释义</p>
+                            </div>
+
+                            <!-- 翻译双栏 -->
+                            <div class="grid grid-cols-2 gap-3 border-t border-b border-amber-900/5 py-2.5 my-1">
+                                <div>
+                                    <div class="inline-flex items-center gap-1 bg-sky-100/60 text-sky-800 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded mb-1">
+                                        <span>ENGLISH</span>
+                                    </div>
+                                    <p id="card-def-en" class="text-[11px] italic text-sky-900/70 leading-snug pl-0.5">No translation.</p>
+                                </div>
+                                <div>
+                                    <div class="inline-flex items-center gap-1 bg-rose-100/60 text-rose-800 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded mb-1">
+                                        <span>MELAYU</span>
+                                    </div>
+                                    <p id="card-def-bm" class="text-[11px] text-rose-900/70 leading-snug pl-0.5 font-medium">Tiada terjemahan.</p>
+                                </div>
+                            </div>
+
+                            <!-- 例句 -->
+                            <div class="bg-white/80 border border-amber-950/5 p-3.5 rounded-xl shadow-sm">
+                                <div class="inline-flex items-center gap-1 bg-amber-900/5 text-amber-900/70 text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded mb-1.5">
+                                    <span>例句</span>
+                                </div>
+                                <p id="card-example" class="text-stone-700 text-[13px] font-medium leading-relaxed pl-0.5 tracking-wide">暂无例句。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
+            
+            <!-- 右导航按钮 -->
+            <button onclick="nextCard()" id="next-btn" class="absolute right-0 z-10 bg-white/80 backdrop-blur-sm hover:bg-white border-2 border-stone-200 hover:border-amber-400 text-stone-700 w-10 h-10 rounded-full shadow-md transition-all flex items-center justify-center text-lg -mr-2">
+                ▶
+            </button>
         </div>
 
-        <!-- ========== 操作按钮 ========== -->
+        <!-- 进度计数器 -->
+        <div class="text-center mb-3">
+            <span id="card-counter" class="text-xs text-stone-400 font-mono">0 / 0</span>
+        </div>
+
+        <!-- 操作按钮 -->
         <div class="w-full flex flex-col items-center gap-3">
             <div class="grid grid-cols-2 gap-4 w-full">
                 <button onclick="markMastery(false)" class="bg-white border-2 border-stone-200 hover:border-red-400 hover:bg-red-50/30 text-stone-700 py-3 px-6 rounded-xl font-semibold shadow-sm transition-all text-center text-sm flex items-center justify-center gap-2">
@@ -158,28 +139,25 @@
         </div>
     </div>
 
-    <!-- ========== Toast 消息通知 ========== -->
+    <!-- Toast 消息 -->
     <div id="toast-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- ========== 测验弹窗 ========== -->
-    <div id="quiz-modal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden z-50 p-4">
+    <!-- Quiz 弹窗 -->
+    <div id="quiz-modal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden z-50 p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 relative flex flex-col max-h-[90vh]">
             <button onclick="closeQuiz()" class="absolute top-3 right-3 text-stone-400 hover:text-stone-600 text-xl font-bold transition-colors">&times;</button>
-            
             <div class="border-b border-stone-100 pb-2 mb-3">
-                <h3 class="text-base font-bold text-stone-800 flex items-center gap-1" id="quiz-title-text">🎯 词汇释义挑战</h3>
+                <h3 class="text-base font-bold text-stone-800 flex items-center gap-1" id="quiz-title-text">🎯 生词释义挑战</h3>
                 <div class="w-full bg-stone-100 h-1.5 rounded-full mt-2 overflow-hidden">
                     <div id="quiz-progress-bar" class="bg-amber-500 h-full transition-all duration-300" style="width: 0%"></div>
                 </div>
                 <p id="quiz-q-num" class="text-[10px] text-stone-400 mt-1 font-mono">题目 1 / 5</p>
             </div>
-
             <div class="flex-1 overflow-y-auto mb-1 pr-1">
                 <div id="quiz-question-container">
                     <h4 id="quiz-question-word" class="text-2xl font-serif font-bold text-stone-800 text-center my-3 tracking-wide">-</h4>
                     <div id="quiz-options" class="space-y-2"></div>
                 </div>
-                
                 <div id="quiz-result-container" class="hidden text-center py-6">
                     <span class="text-4xl block animate-bounce">🏆</span>
                     <h4 class="text-xl font-bold text-stone-800 mt-3">测验圆满结束！</h4>
@@ -194,202 +172,13 @@
     </div>
 
     <!-- ==========================================
-         外部脚本加载（按顺序）
+         脚本加载（顺序很重要！）
          ========================================== -->
-    <!-- 1. 数据 -->
+    <!-- 1. 先加载数据 -->
     <script src="data.js"></script>
     
-    <!-- 2. 核心逻辑（您的 script.js） -->
+    <!-- 2. 再加载逻辑 -->
     <script src="script.js"></script>
-    
-    <!-- 3. 补充功能：分类筛选 + 进度追踪 + Toast -->
-    <script>
-        // ==========================================
-        // 补充：Toast 通知系统
-        // ==========================================
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            const bgClass = type === 'success' 
-                ? 'bg-stone-800 text-white' 
-                : 'bg-red-50 border border-red-200 text-red-800';
-            toast.className = `${bgClass} px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold tracking-wide flex items-center gap-1.5 animate-bounce pointer-events-auto transition-all duration-300`;
-            toast.innerHTML = message;
-            container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.add('opacity-0', '-translate-y-2');
-                setTimeout(() => { toast.remove(); }, 300);
-            }, 2500);
-        }
 
-        // ==========================================
-        // 补充：分类筛选（适配您的 script.js）
-        // ==========================================
-        let activeCategory = '全部';
-
-        function filterCategory(categoryName) {
-            activeCategory = categoryName;
-            
-            // 更新按钮样式
-            const buttons = document.querySelectorAll('#filterNav button');
-            buttons.forEach(btn => {
-                const btnText = btn.innerText.replace(/[📍🏠🪑👤🎨🏃📊]/g, '').trim();
-                if (btnText === categoryName || (categoryName === '全部' && btnText === '全部')) {
-                    btn.classList.add('bg-stone-800', 'text-white', 'border-stone-800');
-                    btn.classList.remove('bg-white', 'text-stone-600', 'border-stone-200');
-                } else {
-                    btn.classList.remove('bg-stone-800', 'text-white', 'border-stone-800');
-                    btn.classList.add('bg-white', 'text-stone-600', 'border-stone-200');
-                }
-            });
-
-            // 切换分类
-            if (categoryName === '全部') {
-                // 恢复每日计划
-                const savedProgress = localStorage.getItem('chengyu_progress');
-                if (savedProgress) {
-                    const progressData = JSON.parse(savedProgress);
-                    currentPlan = progressData.plan;
-                    currentIndex = progressData.index;
-                } else {
-                    const shuffled = [...allIdioms].sort(() => 0.5 - Math.random());
-                    currentPlan = shuffled.slice(0, Math.min(10, allIdioms.length));
-                    currentIndex = 0;
-                }
-                document.getElementById('daily-status').innerText = '每日复习计划（今日 10 词）';
-            } else {
-                // 按分类筛选
-                const filtered = allIdioms.filter(item => item.category === categoryName);
-                currentPlan = filtered.length > 0 ? filtered : [];
-                currentIndex = 0;
-                document.getElementById('daily-status').innerText = `📂 ${categoryName}（${currentPlan.length} 词）`;
-            }
-            
-            renderCard();
-            updateMasteryProgress();
-        }
-
-        // ==========================================
-        // 补充：进度追踪（掌握度）
-        // ==========================================
-        function updateMasteryProgress() {
-            if (typeof allIdioms === 'undefined' || allIdioms.length === 0) {
-                return;
-            }
-            
-            let wrongList = JSON.parse(localStorage.getItem('chengyu_wrong_list')) || [];
-            const totalWords = allIdioms.length;
-            const wrongCount = wrongList.length;
-            const masteredCount = Math.max(0, totalWords - wrongCount);
-            
-            const percent = totalWords > 0 ? Math.round((masteredCount / totalWords) * 100) : 0;
-            
-            const bar = document.getElementById('mastery-progress-bar');
-            if (bar) bar.style.width = `${percent}%`;
-            
-            const txt = document.getElementById('mastery-status');
-            if (txt) txt.innerText = `已掌握 ${masteredCount} / ${totalWords} 词 (${percent}%)`;
-        }
-
-        // ==========================================
-        // 增强：错题数量显示
-        // ==========================================
-        function updateWrongCount() {
-            const wrongList = JSON.parse(localStorage.getItem('chengyu_wrong_list')) || [];
-            const el = document.getElementById('wrong-count');
-            if (el) el.innerText = wrongList.length;
-        }
-
-        // ==========================================
-        // 增强：覆盖原有函数以支持新功能
-        // ==========================================
-        
-        // 增强 updateWeaknessButton
-        const originalUpdateWeakness = updateWeaknessButton;
-        updateWeaknessButton = function(count) {
-            originalUpdateWeakness(count);
-            updateWrongCount();
-            updateMasteryProgress();
-        };
-
-        // 增强 markMastery
-        const originalMarkMastery = markMastery;
-        markMastery = function(isMastered) {
-            originalMarkMastery(isMastery);
-            updateMasteryProgress();
-            updateWrongCount();
-        };
-
-        // 增强 startWeaknessTraining
-        const originalStartWeakness = startWeaknessTraining;
-        startWeaknessTraining = function() {
-            originalStartWeakness();
-            // 更新状态文字
-            const statusEl = document.getElementById('daily-status');
-            if (statusEl) {
-                const wrongList = JSON.parse(localStorage.getItem('chengyu_wrong_list')) || [];
-                statusEl.innerText = `🎯 错题专项集训中（共 ${wrongList.length} 词）`;
-            }
-        };
-
-        // 增强 startQuiz
-        const originalStartQuiz = startQuiz;
-        startQuiz = function() {
-            // 确保 quiz 使用全部数据
-            if (typeof allIdioms === 'undefined' || allIdioms.length < 4) {
-                showToast('⚠️ 数据源词汇数量不足 4 个，无法生成选择题！', 'error');
-                return;
-            }
-            originalStartQuiz();
-        };
-
-        // 增强 closeQuiz
-        const originalCloseQuiz = closeQuiz;
-        closeQuiz = function() {
-            originalCloseQuiz();
-        };
-
-        // 增强 renderCard - 显示分类
-        const originalRenderCard = renderCard;
-        renderCard = function() {
-            originalRenderCard();
-            
-            if (currentPlan.length > 0 && currentIndex < currentPlan.length) {
-                const currentWord = currentPlan[currentIndex];
-                const categoryEl = document.getElementById('card-category');
-                if (categoryEl) {
-                    categoryEl.innerText = `🏷️ ${currentWord.category || '未分类'}`;
-                }
-            }
-        };
-
-        // ==========================================
-        // 启动初始化
-        // ==========================================
-        window.onload = function() {
-            // 等待 script.js 加载完成
-            setTimeout(() => {
-                if (typeof initApp === 'function') {
-                    initApp();
-                    // 延迟一帧确保渲染完成
-                    setTimeout(() => {
-                        updateMasteryProgress();
-                        updateWrongCount();
-                        // 显示分类
-                        if (currentPlan.length > 0 && currentIndex < currentPlan.length) {
-                            const currentWord = currentPlan[currentIndex];
-                            const categoryEl = document.getElementById('card-category');
-                            if (categoryEl) {
-                                categoryEl.innerText = `🏷️ ${currentWord.category || '未分类'}`;
-                            }
-                        }
-                    }, 150);
-                } else {
-                    console.error('❌ script.js 未正确加载或缺少 initApp 函数');
-                }
-            }, 50);
-        };
-    </script>
 </body>
 </html>
