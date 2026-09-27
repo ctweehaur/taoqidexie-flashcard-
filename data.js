@@ -1,4 +1,5 @@
-const vocabularyData = [
+// data.js 直接定义 allIdioms
+var allIdioms = [
     { word: "精力充沛", pinyin: "jīng lì chōng pèi", defZh: "体力和精神都很旺盛。", defEn: "Full of energy / Energetic", defBm: "Penuh tenaga", example: "他虽然忙了一整天，但依然精力充沛。" },
     { word: "烦透了", pinyin: "fán tòu le", defZh: "非常厌烦，厌烦到了极点。", defEn: "Extremely annoyed / Fed up", defBm: "Sangat jengkel", example: "这件事反复说了很多遍，他真是烦透了。" },
     { word: "敞开", pinyin: "chǎng kāi", defZh: "打开，毫无遮掩地开放。", defEn: "Open wide", defBm: "Terbuka luas", example: "他敞开门窗，让清晨的空气流通进来。" },
