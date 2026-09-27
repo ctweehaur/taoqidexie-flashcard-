@@ -52,3 +52,41 @@ ruby {
 rt {
     user-select: none;
 }
+
+
+/* ==========================================================================
+   左右导航按钮样式
+   ========================================================================== */
+
+/* 导航按钮悬停效果 */
+#prev-btn,
+#next-btn {
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+#prev-btn:hover:not(:disabled),
+#next-btn:hover:not(:disabled) {
+    transform: scale(1.1);
+    border-color: #f59e0b; /* amber-400 */
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+#prev-btn:active:not(:disabled),
+#next-btn:active:not(:disabled) {
+    transform: scale(0.9);
+}
+
+/* 禁用状态 */
+#prev-btn:disabled,
+#next-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+    transform: none !important;
+}
+
+/* 卡片计数器 */
+#card-counter {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.05em;
+}
